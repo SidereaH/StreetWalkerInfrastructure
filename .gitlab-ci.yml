@@ -7,7 +7,7 @@ variables:
   NAMESPACE: infra
 
 before_script:
-  - apt update && apt install -y curl tar gzip
+  - apt update && apt install -y curl tar gzip openssl checksum
   - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   - echo "$KUBE_CONFIG" > ~/.kube/config
 
