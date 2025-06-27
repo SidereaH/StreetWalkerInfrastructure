@@ -11,11 +11,14 @@ variables:
 
 before_script:
   - echo "$KUBE_CONFIG" > ~/.kube/config
-  - echo "sosal tut"
-  # - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-  - ls -la && pwd
-  # - chmod 700 get_helm.sh
-  # - ./get_helm.sh
+  - chmod 600 ~/.kube/config
+  - echo "=== KUBECONFIG ==="
+  - cat ~/.kube/config
+  - echo "=== CLUSTER INFO ==="
+  - kubectl config view
+  - kubectl cluster-info || true
+  - echo "=== CURRENT CONTEXT ==="
+  - kubectl config current-context
 create-namespace:
   stage: deploy
   script:
