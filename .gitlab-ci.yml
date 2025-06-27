@@ -21,13 +21,8 @@ deploy-postgresql:
   tags:
     - main
   script:
-    # Используем репозиторий Postgres от Zalando
     - helm repo add cetic https://cetic.github.io/helm-charts
-    - helm upgrade --install postgresql cetic/postgresql --version 0.2.5 \
-        --namespace infra \
-        --set configKubernetes.spilo_runasuser=101 \
-        --set configKubernetes.spilo_runasgroup=103 \
-        --set configKubernetes.spilo_fsgroup=103
+    - helm upgrade --install postgresql cetic/postgresql --version 0.2.5 --namespace infra --set configKubernetes.spilo_runasuser=101 --set configKubernetes.spilo_runasgroup=103 --set configKubernetes.spilo_fsgroup=103
     - kubectl apply -f k8s/postgresql/postgresql-cluster.yaml -n infra
   only:
     - main
@@ -37,14 +32,8 @@ deploy-kafka:
   tags:
     - main
   script:
-    # Используем репозиторий Kafka от Confluent
     - helm repo add confluent https://packages.confluent.io/helm
-    - helm upgrade --install kafka confluent/cp-helm-charts \
-        --namespace infra \
-        --set cp-kafka.persistence.size=10Gi \
-        --set cp-kafka.replicas=1 \
-        --set cp-zookeeper.persistence.size=10Gi \
-        --set cp-zookeeper.replicas=1
+    - helm upgrade --install kafka confluent/cp-helm-charts --namespace infra --set cp-kafka.persistence.size=10Gi --set cp-kafka.replicas=1 --set cp-zookeeper.persistence.size=10Gi --set cp-zookeeper.replicas=1
 
   only:
     - main
@@ -54,13 +43,7 @@ deploy-rabbitmq:
   tags:
     - main
   script:
-    # Используем репозиторий RabbitMQ от Bitnami (через зеркало)
     - helm repo add groundhog2k https://groundhog2k.github.io/helm-charts/
-    - helm upgrade --install rabbitmq groundhog2k/rabbitmq --version 2.1.1 \
-        --namespace infra \
-        --set auth.username="$RABBITMQ_USERNAME" \
-        --set auth.password="$RABBITMQ_PASSWORD" \
-        --set persistence.size=10Gi \
-        --set replicaCount=1
+    - helm upgrade --install rabbitmq groundhog2k/rabbitmq --version 2.1.1 --namespace infra --set auth.username="$RABBITMQ_USERNAME" --set auth.password="$RABBITMQ_PASSWORD" --set persistence.size=10Gi --set replicaCount=1
   only:
     - main
