@@ -1,5 +1,4 @@
-image: aliquamsiderea/k8s-helm-tools
-
+image: alpine/k8s:1.27.4
 stages:
   - deploy
 
