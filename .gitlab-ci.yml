@@ -1,4 +1,5 @@
-image: alpine/k8s:1.27.4
+image: bitnami/kubectl:latest
+
 stages:
   - deploy
 
@@ -7,9 +8,8 @@ variables:
   NAMESPACE: infra
 
 before_script:
-  - apt update && apt install -y curl tar gzip openssl checksum
-  - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   - echo "$KUBE_CONFIG" > ~/.kube/config
+  - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 create-namespace:
   stage: deploy
@@ -29,7 +29,7 @@ deploy-postgresql:
         namespace: infra
       type: Opaque
       data:
-        password: $(echo -n \"$POSTGRES_PASSWORD\" )" > k8s/postgresql/secret.yaml
+        password: $(echo -n \"$POSTGRES_PASSWORD\" | base64 )" > k8s/postgresql/secret.yaml
     - kubectl apply -f k8s/postgresql/secret.yaml
     - kubectl apply -f k8s/postgresql/pvc.yaml
     - kubectl apply -f k8s/postgresql/deployment.yaml
