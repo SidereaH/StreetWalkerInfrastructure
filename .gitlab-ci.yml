@@ -12,14 +12,14 @@ variables:
 before_script:
   - echo "$KUBE_CONFIG" > ~/.kube/config
 
-create-namespace:
-  stage: deploy
-  tags:
-    - main
-  script:
-    - kubectl apply -f namespace.yaml
-  only:
-    - main
+# create-namespace:
+#   stage: deploy
+#   tags:
+#     - main
+#   script:
+#     - kubectl apply -f namespace.yaml
+#   only:
+#     - main
 
 deploy-postgresql:
   stage: deploy
