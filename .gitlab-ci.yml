@@ -1,3 +1,5 @@
+image: alpine/helm:3.14.0
+
 stages:
   - deploy
 
@@ -20,7 +22,6 @@ deploy-postgresql:
   stage: deploy
   script:
     - |
-      # Генерируем secret.yaml с паролем из переменной CI
       echo "apiVersion: v1
       kind: Secret
       metadata:
@@ -28,7 +29,7 @@ deploy-postgresql:
         namespace: infra
       type: Opaque
       data:
-        password: $(echo -n "$POSTGRES_PASSWORD" | base64)" > k8s/postgresql/secret.yaml
+        password: $(echo -n \"$POSTGRES_PASSWORD\" | base64)" > k8s/postgresql/secret.yaml
     - kubectl apply -f k8s/postgresql/secret.yaml
     - kubectl apply -f k8s/postgresql/pvc.yaml
     - kubectl apply -f k8s/postgresql/deployment.yaml
@@ -39,8 +40,11 @@ deploy-postgresql:
 deploy-kafka:
   stage: deploy
   script:
+    - helm repo add bitnami https://charts.bitnami.com/bitnami
+    - helm repo update
     - helm upgrade --install kafka bitnami/kafka \
         --namespace infra \
+        --set auth.enabled=true \
         --set auth.username="$KAFKA_USERNAME" \
         --set auth.password="$KAFKA_PASSWORD" \
         --set persistence.size=10Gi \
@@ -51,6 +55,8 @@ deploy-kafka:
 deploy-rabbitmq:
   stage: deploy
   script:
+    - helm repo add bitnami https://charts.bitnami.com/bitnami
+    - helm repo update
     - helm upgrade --install rabbitmq bitnami/rabbitmq \
         --namespace infra \
         --set auth.username="$RABBITMQ_USERNAME" \
