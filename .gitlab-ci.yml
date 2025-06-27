@@ -11,7 +11,8 @@ variables:
 
 before_script:
   - echo "$KUBE_CONFIG" > ~/.kube/config
-#   - chmod 600 ~/.kube/config
+  - echo "$KUBE_CONFIG"
+  - chmod 600 ~/.kube/config
 #   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 #   - chmod 700 get_helm.sh
 #   - ./get_helm.sh
