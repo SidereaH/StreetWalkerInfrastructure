@@ -11,16 +11,11 @@ variables:
 
 before_script:
   - echo "$KUBE_CONFIG" > ~/.kube/config
-  - chmod 600 ~/.kube/config
-  - echo "=== KUBECONFIG ==="
-  - cat ~/.kube/config
-  - echo "=== CLUSTER INFO ==="
-  - kubectl config view
-  - kubectl cluster-info || true
-  - echo "=== CURRENT CONTEXT ==="
-  - kubectl config current-context
+
 create-namespace:
   stage: deploy
+  tags:
+    - main
   script:
     - kubectl apply -f namespace.yaml
   only:
@@ -47,6 +42,8 @@ deploy-postgresql:
 
 deploy-kafka:
   stage: deploy
+  tags:
+    - main
   script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
     - helm repo update
@@ -62,6 +59,8 @@ deploy-kafka:
 
 deploy-rabbitmq:
   stage: deploy
+  tags:
+    - main
   script:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
     - helm repo update
