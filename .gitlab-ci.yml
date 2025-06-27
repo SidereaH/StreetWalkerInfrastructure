@@ -9,25 +9,27 @@ variables:
   KUBECONFIG: "/builds/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/kubeconfig"
   NAMESPACE: infra
 
-before_script:
-  - echo "$KUBE_CONFIG" > ~/.kube/config
-  - chmod 600 ~/.kube/config
-  # Установка Helm (если не предустановлен)
-  - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-  - chmod 700 get_helm.sh
-  - ./get_helm.sh
+# before_script:
+#   - echo "$KUBE_CONFIG" > ~/.kube/config
+#   - chmod 600 ~/.kube/config
+#   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+#   - chmod 700 get_helm.sh
+#   - ./get_helm.sh
 
 deploy-postgresql:
   stage: deploy
   tags:
     - main
   script:
-    - helm repo add crunchy https://charts.crunchydata.com/
-    - helm upgrade --install postgresql crunchy/postgresql \
+    # Используем репозиторий Postgres от Zalando
+    - helm repo add zalando https://zalando.github.io/postgres-operator/charts/postgres-operator
+    - helm upgrade --install postgresql zalando/postgres-operator \
         --namespace infra \
-        --set postgresqlPassword=$POSTGRES_PASSWORD \
-        --set persistence.size=10Gi \
-        --set replicaCount=1
+        --set configKubernetes.spilo_runasuser=101 \
+        --set configKubernetes.spilo_runasgroup=103 \
+        --set configKubernetes.spilo_fsgroup=103
+    # Применяем кастомный манифест для Postgres
+    - kubectl apply -f k8s/postgresql/postgresql-cluster.yaml -n infra
   only:
     - main
 
@@ -36,9 +38,14 @@ deploy-kafka:
   tags:
     - main
   script:
-    - kubectl create namespace infra || true
-    - kubectl apply -f https://strimzi.io/install/latest?namespace=infra
-    - kubectl apply -f k8s/kafka/kafka-cluster.yaml -n infra
+    # Используем репозиторий Kafka от Confluent
+    - helm repo add confluent https://packages.confluent.io/helm
+    - helm upgrade --install kafka confluent/cp-helm-charts \
+        --namespace infra \
+        --set cp-kafka.persistence.size=10Gi \
+        --set cp-kafka.replicas=1 \
+        --set cp-zookeeper.persistence.size=10Gi \
+        --set cp-zookeeper.replicas=1
   only:
     - main
 
@@ -47,11 +54,12 @@ deploy-rabbitmq:
   tags:
     - main
   script:
-    - helm repo add rabbitmq https://charts.helm.sh/stable
-    - helm upgrade --install rabbitmq rabbitmq/rabbitmq \
+    # Используем репозиторий RabbitMQ от Bitnami (через зеркало)
+    - helm repo add bitnami-mirror https://charts.bitnami.com/bitnami
+    - helm upgrade --install rabbitmq bitnami-mirror/rabbitmq \
         --namespace infra \
-        --set auth.username=$RABBITMQ_USERNAME \
-        --set auth.password=$RABBITMQ_PASSWORD \
+        --set auth.username="$RABBITMQ_USERNAME" \
+        --set auth.password="$RABBITMQ_PASSWORD" \
         --set persistence.size=10Gi \
         --set replicaCount=1
   only:
