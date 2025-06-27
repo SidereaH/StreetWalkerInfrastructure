@@ -12,6 +12,7 @@ variables:
 before_script:
   - echo "$KUBE_CONFIG" > ~/.kube/config
   - echo "$KUBE_CONFIG"
+  - cat ~/.kube/config
   - chmod 600 ~/.kube/config
 #   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 #   - chmod 700 get_helm.sh
@@ -34,9 +35,9 @@ deploy-kafka:
   tags:
     - main
   script:
-    - helm repo add confluent https://packages.confluent.io/helm
+    - helm repo add kafka https://helm-charts.itboon.top/kafka/
     - helm repo update
-    - helm upgrade --install kafka confluent/cp-helm-charts --namespace infra --set cp-kafka.persistence.size=10Gi --set cp-kafka.replicas=1 --set cp-zookeeper.persistence.size=10Gi --set cp-zookeeper.replicas=1
+    - helm upgrade --install kafka kafka/kafka --version 18.0.1 --namespace infra --set cp-kafka.persistence.size=10Gi --set cp-kafka.replicas=1 --set cp-zookeeper.persistence.size=10Gi --set cp-zookeeper.replicas=1
 
   only:
     - main
