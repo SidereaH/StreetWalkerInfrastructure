@@ -1,4 +1,4 @@
-image: lachlanevenson/k8s-helm:latest
+image: aliquamsiderea/k8s-helm-tools
 
 stages:
   - deploy
@@ -8,7 +8,8 @@ variables:
   NAMESPACE: infra
 
 before_script:
-  - mkdir -p ~/.kube
+  - apt update && apt install -y curl tar gzip
+  - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   - echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
 
 create-namespace:
