@@ -1,0 +1,61 @@
+stages:
+  - deploy
+
+variables:
+  KUBECONFIG: "/builds/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/kubeconfig"
+  NAMESPACE: infra
+
+before_script:
+  - mkdir -p ~/.kube
+  - echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
+
+create-namespace:
+  stage: deploy
+  script:
+    - kubectl apply -f k8s/namespace.yaml
+  only:
+    - main
+
+deploy-postgresql:
+  stage: deploy
+  script:
+    - |
+      # Генерируем secret.yaml с паролем из переменной CI
+      echo "apiVersion: v1
+      kind: Secret
+      metadata:
+        name: postgresql-secret
+        namespace: infra
+      type: Opaque
+      data:
+        password: $(echo -n "$POSTGRES_PASSWORD" | base64)" > k8s/postgresql/secret.yaml
+    - kubectl apply -f k8s/postgresql/secret.yaml
+    - kubectl apply -f k8s/postgresql/pvc.yaml
+    - kubectl apply -f k8s/postgresql/deployment.yaml
+    - kubectl apply -f k8s/postgresql/service.yaml
+  only:
+    - main
+
+deploy-kafka:
+  stage: deploy
+  script:
+    - helm upgrade --install kafka bitnami/kafka \
+        --namespace infra \
+        --set auth.username="$KAFKA_USERNAME" \
+        --set auth.password="$KAFKA_PASSWORD" \
+        --set persistence.size=10Gi \
+        --set replicaCount=1
+  only:
+    - main
+
+deploy-rabbitmq:
+  stage: deploy
+  script:
+    - helm upgrade --install rabbitmq bitnami/rabbitmq \
+        --namespace infra \
+        --set auth.username="$RABBITMQ_USERNAME" \
+        --set auth.password="$RABBITMQ_PASSWORD" \
+        --set persistence.size=10Gi \
+        --set replicaCount=1
+  only:
+    - main
