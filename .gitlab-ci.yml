@@ -19,7 +19,7 @@ before_script:
 create-namespace:
   stage: deploy
   script:
-    - kubectl apply -f INFRASTRUCTURE/k8s/namespace.yaml
+    - kubectl apply -f namespace.yaml
   only:
     - main
 
