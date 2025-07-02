@@ -12,8 +12,7 @@ deploy-postgresql:
   script:
     - helm repo add cetic https://cetic.github.io/helm-charts
     - helm repo update
-    - helm upgrade --install postgresql cetic/postgresql --version 0.2.5 --namespace infra --set configKubernetes.spilo_runasuser=101 --set configKubernetes.spilo_runasgroup=103 --set configKubernetes.spilo_fsgroup=103
-    - kubectl apply -f k8s/postgresql/deployment.yaml -n infra
+    - helm upgrade --install postgresql cetic/postgresql --version 0.2.5 --namespace infra --set configKubernetes.spilo_runasuser=101 --set configKubernetes.spilo_runasgroup=103 --set configKubernetes.spilo_fsgroup=103 --set config.dbUser=${DB_USER} --set config.dbPassword=${DB_PASSWORD} --set config.dbName=${DB_NAME} 
   only:
     - main
   tags:
