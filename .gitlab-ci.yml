@@ -1,4 +1,3 @@
-image: alpine:3.19  # Или любой lightweight, т.к. используем системные kubectl/helm
 
 stages:
   - deploy
