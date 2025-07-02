@@ -22,6 +22,8 @@ deploy-postgresql:
     - kubectl apply -f k8s/postgresql/postgresql-cluster.yaml -n infra
   only:
     - main
+  tags:
+    - main
 
 deploy-kafka:
   stage: deploy
@@ -37,6 +39,8 @@ deploy-kafka:
         --set cp-zookeeper.replicas=1
   only:
     - main
+  tags:
+    - main
 
 deploy-rabbitmq:
   stage: deploy
@@ -51,4 +55,6 @@ deploy-rabbitmq:
         --set persistence.size=10Gi \
         --set replicaCount=1
   only:
+    - main
+  tags:
     - main
